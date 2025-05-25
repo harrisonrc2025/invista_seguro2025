@@ -1,4 +1,4 @@
-// Calculadora de Investimentos - By Harrison Costa
+// Calculadora de Investimentos Aprimorada - By Harrison Costa
 // Desenvolvido para análise de investimentos penhoráveis e impenhoráveis
 
 // Taxas de juros atualizadas (valores de referência para 2025)
@@ -18,6 +18,17 @@ const taxas = {
     fundos_multimercado: 0.1350, // 13,50% ao ano
     acoes: 0.1500, // 15,00% ao ano (estimativa)
     fiis: 0.1200, // 12,00% ao ano (estimativa)
+};
+
+// Expectativa de vida para cálculo de valor vitalício (em anos)
+const expectativaVida = {
+    30: 50, // 30 anos de idade: mais 50 anos de expectativa
+    40: 42, // 40 anos de idade: mais 42 anos de expectativa
+    50: 33, // 50 anos de idade: mais 33 anos de expectativa
+    60: 23, // 60 anos de idade: mais 23 anos de expectativa
+    70: 15, // 70 anos de idade: mais 15 anos de expectativa
+    80: 9,  // 80 anos de idade: mais 9 anos de expectativa
+    padrao: 25 // valor padrão para cálculo
 };
 
 // Riscos de penhora (0 = baixo risco, 1 = alto risco)
@@ -79,6 +90,38 @@ function calcularIR(rendimento, anos) {
     return rendimento * aliquota;
 }
 
+// Função para calcular valor vitalício (renda mensal estimada)
+function calcularValorVitalicio(montanteFinal, idade) {
+    // Determinar expectativa de vida restante
+    let anosRestantes;
+    if (idade >= 80) {
+        anosRestantes = expectativaVida[80];
+    } else if (idade >= 70) {
+        anosRestantes = expectativaVida[70];
+    } else if (idade >= 60) {
+        anosRestantes = expectativaVida[60];
+    } else if (idade >= 50) {
+        anosRestantes = expectativaVida[50];
+    } else if (idade >= 40) {
+        anosRestantes = expectativaVida[40];
+    } else if (idade >= 30) {
+        anosRestantes = expectativaVida[30];
+    } else {
+        anosRestantes = expectativaVida.padrao;
+    }
+    
+    // Taxa de juros mensal conservadora para a fase de desacumulação (4% a.a.)
+    const taxaMensalDesacumulacao = Math.pow(1.04, 1/12) - 1;
+    
+    // Fator de valor presente de uma anuidade
+    // Fórmula: [1 - (1 + r)^-n] / r, onde r é a taxa mensal e n é o número de meses
+    const meses = anosRestantes * 12;
+    const fatorAnuidade = (1 - Math.pow(1 + taxaMensalDesacumulacao, -meses)) / taxaMensalDesacumulacao;
+    
+    // Valor da renda mensal vitalícia estimada
+    return montanteFinal / fatorAnuidade;
+}
+
 // Função para verificar impenhorabilidade
 function verificarImpenhorabilidade(tipoInvestimento, valor) {
     const salarioMinimo = 1412; // Valor do salário mínimo em 2025
@@ -111,13 +154,8 @@ function verificarImpenhorabilidade(tipoInvestimento, valor) {
     }
 }
 
-// Função para calcular e exibir resultados
-function calcularInvestimento() {
-    const valorInicial = parseFloat(document.getElementById('valorInicial').value) || 3000;
-    const aporteMensal = parseFloat(document.getElementById('aporteMensal').value) || 0;
-    const anos = parseInt(document.getElementById('anos').value) || 10;
-    const tipoInvestimento = document.getElementById('tipoInvestimento').value;
-    
+// Função para calcular e exibir resultados para um período específico
+function calcularParaPeriodo(valorInicial, aporteMensal, anos, tipoInvestimento, perfilRisco, idade) {
     let taxa;
     if (tipoInvestimento === 'tesouro_selic') {
         taxa = taxas.tesouro_selic;
@@ -130,7 +168,6 @@ function calcularInvestimento() {
     } else if (tipoInvestimento === 'lci_lca') {
         taxa = taxas.lci_lca;
     } else if (tipoInvestimento === 'previdencia_pgbl' || tipoInvestimento === 'previdencia_vgbl') {
-        const perfilRisco = document.getElementById('perfilRisco').value;
         if (perfilRisco === 'conservador') {
             taxa = taxas.previdencia_conservadora;
         } else if (perfilRisco === 'moderado') {
@@ -162,11 +199,62 @@ function calcularInvestimento() {
         ir = calcularIR(rendimento, anos);
     }
     
+    // Calcular valor líquido final
+    const valorLiquidoFinal = montanteFinal - ir;
+    
+    // Calcular valor vitalício (renda mensal estimada)
+    const valorVitalicio = calcularValorVitalicio(valorLiquidoFinal, idade);
+    
     // Verificar impenhorabilidade
     const statusPenhora = verificarImpenhorabilidade(tipoInvestimento, montanteFinal);
     
     // Calcular risco de penhora
     const risco = riscoPenhora[tipoInvestimento] || 0.8;
+    
+    return {
+        anos,
+        taxa,
+        montanteFinal,
+        rendimento,
+        ir,
+        valorLiquidoFinal,
+        valorVitalicio,
+        statusPenhora,
+        risco
+    };
+}
+
+// Função para calcular e exibir resultados para todos os períodos padrão
+function calcularInvestimento() {
+    const valorInicial = parseFloat(document.getElementById('valorInicial').value) || 3000;
+    const aporteMensal = parseFloat(document.getElementById('aporteMensal').value) || 0;
+    const tipoInvestimento = document.getElementById('tipoInvestimento').value;
+    const idade = parseInt(document.getElementById('idade').value) || 40;
+    
+    let perfilRisco = 'moderado';
+    if (document.getElementById('perfilRiscoDiv').style.display !== 'none') {
+        perfilRisco = document.getElementById('perfilRisco').value;
+    }
+    
+    // Calcular para períodos padrão (5, 10 e 20 anos)
+    const resultado5Anos = calcularParaPeriodo(valorInicial, aporteMensal, 5, tipoInvestimento, perfilRisco, idade);
+    const resultado10Anos = calcularParaPeriodo(valorInicial, aporteMensal, 10, tipoInvestimento, perfilRisco, idade);
+    const resultado20Anos = calcularParaPeriodo(valorInicial, aporteMensal, 20, tipoInvestimento, perfilRisco, idade);
+    
+    // Calcular para período personalizado
+    const anosPers = parseInt(document.getElementById('anos').value) || 10;
+    let resultadoPers = resultado10Anos; // Valor padrão
+    
+    // Se o período personalizado for diferente dos padrões, calcular novamente
+    if (anosPers !== 5 && anosPers !== 10 && anosPers !== 20) {
+        resultadoPers = calcularParaPeriodo(valorInicial, aporteMensal, anosPers, tipoInvestimento, perfilRisco, idade);
+    } else if (anosPers === 5) {
+        resultadoPers = resultado5Anos;
+    } else if (anosPers === 10) {
+        resultadoPers = resultado10Anos;
+    } else if (anosPers === 20) {
+        resultadoPers = resultado20Anos;
+    }
     
     // Exibir resultados
     const resultadoDiv = document.getElementById('resultado');
@@ -182,32 +270,87 @@ function calcularInvestimento() {
                 <strong>R$ ${aporteMensal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
             </div>
             <div class="resultado-item">
-                <span>Tempo de Investimento:</span>
-                <strong>${anos} anos</strong>
+                <span>Idade Atual:</span>
+                <strong>${idade} anos</strong>
             </div>
             <div class="resultado-item">
                 <span>Taxa de Juros Anual:</span>
-                <strong>${(taxa * 100).toFixed(2)}%</strong>
+                <strong>${(resultadoPers.taxa * 100).toFixed(2)}%</strong>
             </div>
+        </div>
+        
+        <h3>Comparativo por Período</h3>
+        <div class="tabela-comparativa">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Montante Final</th>
+                        <th>Rendimento</th>
+                        <th>Valor Líquido</th>
+                        <th>Renda Mensal Vitalícia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>5 anos</strong></td>
+                        <td>R$ ${resultado5Anos.montanteFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado5Anos.rendimento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado5Anos.valorLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado5Anos.valorVitalicio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr>
+                        <td><strong>10 anos</strong></td>
+                        <td>R$ ${resultado10Anos.montanteFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado10Anos.rendimento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado10Anos.valorLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado10Anos.valorVitalicio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr>
+                        <td><strong>20 anos</strong></td>
+                        <td>R$ ${resultado20Anos.montanteFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado20Anos.rendimento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado20Anos.valorLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultado20Anos.valorVitalicio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    ${anosPers !== 5 && anosPers !== 10 && anosPers !== 20 ? `
+                    <tr>
+                        <td><strong>${anosPers} anos</strong></td>
+                        <td>R$ ${resultadoPers.montanteFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultadoPers.rendimento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultadoPers.valorLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td>R$ ${resultadoPers.valorVitalicio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    ` : ''}
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>Detalhes do Período Selecionado (${resultadoPers.anos} anos)</h3>
+        <div class="resultado-card">
             <div class="resultado-item">
                 <span>Montante Final:</span>
-                <strong>R$ ${montanteFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                <strong>R$ ${resultadoPers.montanteFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
             </div>
             <div class="resultado-item">
                 <span>Rendimento Total:</span>
-                <strong>R$ ${rendimento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                <strong>R$ ${resultadoPers.rendimento.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
             </div>
             <div class="resultado-item">
                 <span>Imposto de Renda:</span>
-                <strong>R$ ${ir.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                <strong>R$ ${resultadoPers.ir.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
             </div>
             <div class="resultado-item">
                 <span>Rendimento Líquido:</span>
-                <strong>R$ ${(rendimento - ir).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                <strong>R$ ${(resultadoPers.rendimento - resultadoPers.ir).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
             </div>
             <div class="resultado-item">
                 <span>Valor Final Líquido:</span>
-                <strong>R$ ${(montanteFinal - ir).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+                <strong>R$ ${resultadoPers.valorLiquidoFinal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</strong>
+            </div>
+            <div class="resultado-item highlight">
+                <span>Renda Mensal Vitalícia Estimada:</span>
+                <strong>R$ ${resultadoPers.valorVitalicio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</strong>
             </div>
         </div>
         
@@ -215,28 +358,28 @@ function calcularInvestimento() {
         <div class="penhora-card">
             <div class="penhora-item">
                 <span>Status de Impenhorabilidade:</span>
-                <strong>${statusPenhora.impenhoravel}</strong>
+                <strong>${resultadoPers.statusPenhora.impenhoravel}</strong>
             </div>
             <div class="penhora-item">
                 <span>Motivo:</span>
-                <strong>${statusPenhora.motivo}</strong>
+                <strong>${resultadoPers.statusPenhora.motivo}</strong>
             </div>
             <div class="penhora-item">
                 <span>Limite de Proteção:</span>
-                <strong>${statusPenhora.limite}</strong>
+                <strong>${resultadoPers.statusPenhora.limite}</strong>
             </div>
             <div class="penhora-item">
                 <span>Risco de Penhora:</span>
                 <div class="risco-barra">
-                    <div class="risco-nivel" style="width: ${risco * 100}%"></div>
+                    <div class="risco-nivel" style="width: ${resultadoPers.risco * 100}%"></div>
                 </div>
-                <strong>${(risco * 100).toFixed(0)}%</strong>
+                <strong>${(resultadoPers.risco * 100).toFixed(0)}%</strong>
             </div>
         </div>
     `;
     
     // Mostrar gráfico de evolução
-    gerarGraficoEvolucao(valorInicial, aporteMensal, taxa, anos);
+    gerarGraficoEvolucao(valorInicial, aporteMensal, resultadoPers.taxa, resultadoPers.anos);
 }
 
 // Função para gerar gráfico de evolução do patrimônio
@@ -264,18 +407,13 @@ function gerarGraficoEvolucao(valorInicial, aporteMensal, taxa, anos) {
         }
     }
     
-    // Aqui seria implementada a geração do gráfico usando uma biblioteca como Chart.js
-    // Como estamos criando apenas o JavaScript base, deixaremos a implementação visual para o HTML/CSS
-    
-    const dadosGrafico = {
+    // Armazenar dados para uso posterior na renderização do gráfico
+    window.dadosGrafico = {
         labels: labels,
         patrimonio: dataPatrimonio,
         aportes: dataAportes,
         rendimentos: dataRendimentos
     };
-    
-    // Armazenar dados para uso posterior na renderização do gráfico
-    window.dadosGrafico = dadosGrafico;
 }
 
 // Função para atualizar campos com base no tipo de investimento selecionado
@@ -290,11 +428,30 @@ function atualizarCampos() {
     }
 }
 
+// Função para selecionar período padrão
+function selecionarPeriodo(anos) {
+    document.getElementById('anos').value = anos;
+    calcularInvestimento();
+}
+
 // Inicializar a calculadora quando a página carregar
 document.addEventListener('DOMContentLoaded', function() {
     // Configurar listeners de eventos
     document.getElementById('tipoInvestimento').addEventListener('change', atualizarCampos);
     document.getElementById('calcularBtn').addEventListener('click', calcularInvestimento);
+    
+    // Configurar botões de período
+    document.getElementById('btn5anos').addEventListener('click', function() {
+        selecionarPeriodo(5);
+    });
+    
+    document.getElementById('btn10anos').addEventListener('click', function() {
+        selecionarPeriodo(10);
+    });
+    
+    document.getElementById('btn20anos').addEventListener('click', function() {
+        selecionarPeriodo(20);
+    });
     
     // Inicializar campos
     atualizarCampos();

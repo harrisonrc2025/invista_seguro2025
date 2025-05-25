@@ -1,0 +1,114 @@
+/* Estilos adicionais para a calculadora atualizada */
+
+/* Botões de período */
+.periodo-buttons {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.btn-periodo {
+    flex: 1;
+    background-color: rgba(0, 120, 215, 0.1);
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 0.8rem 0;
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+    text-align: center;
+}
+
+.btn-periodo:hover {
+    background-color: rgba(0, 120, 215, 0.2);
+    transform: translateY(-2px);
+}
+
+.btn-periodo.active {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Tabela comparativa */
+.tabela-comparativa {
+    overflow-x: auto;
+    margin-bottom: 1.5rem;
+}
+
+.tabela-comparativa table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+}
+
+.tabela-comparativa th {
+    background: linear-gradient(135deg, rgba(0, 120, 215, 0.1) 0%, rgba(232, 62, 140, 0.1) 100%);
+    color: var(--primary-color);
+    font-weight: 600;
+    text-align: center;
+}
+
+.tabela-comparativa td {
+    text-align: center;
+}
+
+.tabela-comparativa tr:hover {
+    background-color: rgba(0, 120, 215, 0.05);
+}
+
+/* Destaque para valor vitalício */
+.highlight {
+    background-color: rgba(232, 62, 140, 0.1);
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+.highlight strong {
+    color: var(--secondary-color);
+    font-size: 1.1em;
+}
+
+/* Responsividade para tabelas */
+@media (max-width: 768px) {
+    .tabela-comparativa {
+        font-size: 0.9rem;
+    }
+    
+    .tabela-comparativa th,
+    .tabela-comparativa td {
+        padding: 0.6rem 0.4rem;
+    }
+    
+    .periodo-buttons {
+        flex-direction: row;
+    }
+    
+    .btn-periodo {
+        padding: 0.6rem 0;
+        font-size: 0.9rem;
+    }
+}
+
+/* Animação para atualização de índices */
+.atualizacao-info {
+    margin-top: 1rem;
+    padding: 0.5rem;
+    background-color: rgba(40, 167, 69, 0.1);
+    border-radius: 8px;
+    text-align: center;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.7;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.7;
+    }
+}
