@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Investimento - By Harrison Costa</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>CALCULADORA DE INVESTIMENTO</h1>
+            <p>By Harrison Costa &copy;2025</p>
+        </div>
+    </header>
+
+    <nav>
+        <ul>
+            <li><a href="index.html" class="active"><i class="fas fa-calculator"></i> Calculadora</a></li>
+            <li><a href="investimentos.html"><i class="fas fa-chart-line"></i> Tipos de Investimentos</a></li>
+            <li><a href="impenhorabilidade.html"><i class="fas fa-gavel"></i> Impenhorabilidade</a></li>
+            <li><a href="riscos.html"><i class="fas fa-exclamation-triangle"></i> Riscos</a></li>
+            <li><a href="sobre.html"><i class="fas fa-info-circle"></i> Sobre</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <section class="intro">
+            <h2>Análise para Investimento</h2>
+            <p>Esta calculadora permite simular diferentes cenários de investimento, considerando aspectos como rendimento, tributação e risco de penhora. Comece com um valor inicial de R$ 3.000,00 ou personalize conforme sua necessidade.</p>
+        </section>
+
+        <section class="calculator">
+            <div class="calculator-form">
+                <h3>Parâmetros da Simulação</h3>
+                <div class="form-group">
+                    <label for="valorInicial">Valor Inicial (R$):</label>
+                    <input type="number" id="valorInicial" value="3000" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label for="aporteMensal">Aporte Mensal (R$):</label>
+                    <input type="number" id="aporteMensal" value="0" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label for="anos">Tempo (anos):</label>
+                    <input type="number" id="anos" value="10" min="1" max="50">
+                </div>
+                <div class="form-group">
+                    <label for="tipoInvestimento">Tipo de Investimento:</label>
+                    <select id="tipoInvestimento">
+                        <optgroup label="Tesouro Nacional">
+                            <option value="tesouro_selic">Tesouro Selic</option>
+                            <option value="tesouro_prefixado">Tesouro Prefixado</option>
+                            <option value="tesouro_ipca">Tesouro IPCA+</option>
+                        </optgroup>
+                        <optgroup label="Renda Fixa">
+                            <option value="cdb">CDB</option>
+                            <option value="lci_lca">LCI/LCA</option>
+                            <option value="poupanca">Poupança</option>
+                            <option value="fundos_di">Fundos DI</option>
+                            <option value="fundos_renda_fixa">Fundos de Renda Fixa</option>
+                        </optgroup>
+                        <optgroup label="Previdência Privada">
+                            <option value="previdencia_pgbl">PGBL</option>
+                            <option value="previdencia_vgbl">VGBL</option>
+                        </optgroup>
+                        <optgroup label="Renda Variável">
+                            <option value="fundos_multimercado">Fundos Multimercado</option>
+                            <option value="acoes">Ações</option>
+                            <option value="fiis">Fundos Imobiliários</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div class="form-group" id="perfilRiscoDiv" style="display: none;">
+                    <label for="perfilRisco">Perfil de Risco:</label>
+                    <select id="perfilRisco">
+                        <option value="conservador">Conservador</option>
+                        <option value="moderado">Moderado</option>
+                        <option value="agressivo">Agressivo</option>
+                    </select>
+                </div>
+                <button id="calcularBtn" class="btn-calcular">Calcular</button>
+            </div>
+
+            <div id="resultado" class="resultado">
+                <!-- Resultados serão inseridos aqui via JavaScript -->
+            </div>
+        </section>
+
+        <section class="grafico">
+            <h3>Evolução do Patrimônio</h3>
+            <div class="grafico-container">
+                <canvas id="graficoEvolucao"></canvas>
+            </div>
+        </section>
+
+        <section class="info-box">
+            <h3>Saiba Mais</h3>
+            <p>Explore as outras páginas para conhecer detalhes sobre cada tipo de investimento, riscos associados e regras de impenhorabilidade. Entenda como proteger seu patrimônio e fazer escolhas financeiras mais seguras.</p>
+            <div class="buttons">
+                <a href="investimentos.html" class="btn-info">Tipos de Investimentos</a>
+                <a href="impenhorabilidade.html" class="btn-info">Impenhorabilidade</a>
+                <a href="riscos.html" class="btn-info">Riscos</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Calculadora de Investimento - By Harrison Costa. Todos os direitos reservados.</p>
+        <p>Esta ferramenta tem caráter informativo e não constitui recomendação de investimento.</p>
+    </footer>
+
+    <script src="calculadora.js"></script>
+    <script src="grafico.js"></script>
+</body>
+</html>
