@@ -584,3 +584,51 @@ section:nth-child(4) {
         opacity: 0.7;
     }
 }
+/* Estilos adicionais para a tabela comparativa de rendas vitalícias */
+
+.destaque {
+    background-color: rgba(232, 62, 140, 0.1);
+    font-weight: bold;
+}
+
+.destaque td {
+    color: var(--secondary-color);
+}
+
+.tabela-comparativa {
+    margin-bottom: 2rem;
+}
+
+.tabela-comparativa table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabela-comparativa th {
+    background: linear-gradient(135deg, rgba(0, 120, 215, 0.1) 0%, rgba(232, 62, 140, 0.1) 100%);
+    color: var(--primary-color);
+    font-weight: 600;
+    text-align: center;
+    padding: 1rem 0.5rem;
+}
+
+.tabela-comparativa td {
+    text-align: center;
+    padding: 0.8rem 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.tabela-comparativa tr:hover {
+    background-color: rgba(0, 120, 215, 0.05);
+}
+
+/* Responsividade para tabelas */
+@media (max-width: 768px) {
+    .tabela-comparativa {
+        overflow-x: auto;
+    }
+    
+    .tabela-comparativa table {
+        min-width: 600px;
+    }
+}

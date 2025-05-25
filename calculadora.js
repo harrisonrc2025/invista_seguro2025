@@ -224,6 +224,35 @@ function calcularParaPeriodo(valorInicial, aporteMensal, anos, tipoInvestimento,
     };
 }
 
+// Função para calcular rendas vitalícias para todos os investimentos
+function calcularRendasVitaliciasComparativas(valorInicial, aporteMensal, anos, idade) {
+    const resultados = {};
+    
+    // Tesouro Direto
+    resultados.tesouro_selic = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'tesouro_selic', null, idade).valorVitalicio;
+    resultados.tesouro_prefixado = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'tesouro_prefixado', null, idade).valorVitalicio;
+    resultados.tesouro_ipca = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'tesouro_ipca', null, idade).valorVitalicio;
+    
+    // Renda Fixa
+    resultados.cdb = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'cdb', null, idade).valorVitalicio;
+    resultados.lci_lca = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'lci_lca', null, idade).valorVitalicio;
+    resultados.poupanca = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'poupanca', null, idade).valorVitalicio;
+    resultados.fundos_di = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'fundos_di', null, idade).valorVitalicio;
+    resultados.fundos_renda_fixa = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'fundos_renda_fixa', null, idade).valorVitalicio;
+    
+    // Previdência
+    resultados.previdencia_conservadora = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'previdencia_pgbl', 'conservador', idade).valorVitalicio;
+    resultados.previdencia_moderada = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'previdencia_pgbl', 'moderado', idade).valorVitalicio;
+    resultados.previdencia_agressiva = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'previdencia_pgbl', 'agressivo', idade).valorVitalicio;
+    
+    // Renda Variável
+    resultados.fundos_multimercado = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'fundos_multimercado', null, idade).valorVitalicio;
+    resultados.acoes = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'acoes', null, idade).valorVitalicio;
+    resultados.fiis = calcularParaPeriodo(valorInicial, aporteMensal, anos, 'fiis', null, idade).valorVitalicio;
+    
+    return resultados;
+}
+
 // Função para calcular e exibir resultados para todos os períodos padrão
 function calcularInvestimento() {
     const valorInicial = parseFloat(document.getElementById('valorInicial').value) || 3000;
@@ -255,6 +284,13 @@ function calcularInvestimento() {
     } else if (anosPers === 20) {
         resultadoPers = resultado20Anos;
     }
+    
+    // Calcular rendas vitalícias para todos os investimentos
+    const rendasVitaliciasComparativas = {
+        anos5: calcularRendasVitaliciasComparativas(valorInicial, aporteMensal, 5, idade),
+        anos10: calcularRendasVitaliciasComparativas(valorInicial, aporteMensal, 10, idade),
+        anos20: calcularRendasVitaliciasComparativas(valorInicial, aporteMensal, 20, idade)
+    };
     
     // Exibir resultados
     const resultadoDiv = document.getElementById('resultado');
@@ -322,6 +358,68 @@ function calcularInvestimento() {
                         <td>R$ ${resultadoPers.valorVitalicio.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
                     </tr>
                     ` : ''}
+                </tbody>
+            </table>
+        </div>
+        
+        <h3>Renda Vitalícia Comparativa (${resultadoPers.anos} anos)</h3>
+        <div class="tabela-comparativa">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tipo de Investimento</th>
+                        <th>Renda Mensal Vitalícia</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="${tipoInvestimento === 'tesouro_selic' ? 'destaque' : ''}">
+                        <td><strong>Tesouro Selic</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].tesouro_selic.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'tesouro_prefixado' ? 'destaque' : ''}">
+                        <td><strong>Tesouro Prefixado</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].tesouro_prefixado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'tesouro_ipca' ? 'destaque' : ''}">
+                        <td><strong>Tesouro IPCA+</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].tesouro_ipca.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'cdb' ? 'destaque' : ''}">
+                        <td><strong>CDB</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].cdb.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'lci_lca' ? 'destaque' : ''}">
+                        <td><strong>LCI/LCA</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].lci_lca.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'poupanca' ? 'destaque' : ''}">
+                        <td><strong>Poupança</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].poupanca.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${(tipoInvestimento === 'previdencia_pgbl' || tipoInvestimento === 'previdencia_vgbl') && perfilRisco === 'conservador' ? 'destaque' : ''}">
+                        <td><strong>Previdência (Conservadora)</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].previdencia_conservadora.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${(tipoInvestimento === 'previdencia_pgbl' || tipoInvestimento === 'previdencia_vgbl') && perfilRisco === 'moderado' ? 'destaque' : ''}">
+                        <td><strong>Previdência (Moderada)</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].previdencia_moderada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${(tipoInvestimento === 'previdencia_pgbl' || tipoInvestimento === 'previdencia_vgbl') && perfilRisco === 'agressivo' ? 'destaque' : ''}">
+                        <td><strong>Previdência (Agressiva)</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].previdencia_agressiva.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'fundos_multimercado' ? 'destaque' : ''}">
+                        <td><strong>Fundos Multimercado</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].fundos_multimercado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'acoes' ? 'destaque' : ''}">
+                        <td><strong>Ações</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].acoes.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
+                    <tr class="${tipoInvestimento === 'fiis' ? 'destaque' : ''}">
+                        <td><strong>Fundos Imobiliários</strong></td>
+                        <td>R$ ${rendasVitaliciasComparativas[`anos${resultadoPers.anos === 5 ? '5' : (resultadoPers.anos === 10 ? '10' : '20')}`].fiis.toLocaleString('pt-BR', {minimumFractionDigits: 2})}/mês</td>
+                    </tr>
                 </tbody>
             </table>
         </div>
